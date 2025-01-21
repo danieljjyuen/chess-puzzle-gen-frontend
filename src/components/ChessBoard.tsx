@@ -63,7 +63,7 @@
                     after: (from:Key, to: Key) => {
                         //handleMove(from, to)
                         try{    
-                            const move:Move = game.move({from, to});
+                            const move:Move = game.move({from, to, promotion: 'q'});
                             if (move) {
                                 setPosition(game.fen());
                                 updateDests();
@@ -92,6 +92,12 @@
             }
         }
         );
+        
+        //update destinations on mount
+        useEffect(() => {
+            updateDests();
+        },[]);
+        
         useEffect(() => {
             // setPosition(game.fen());
             // updateDests();
