@@ -3,10 +3,10 @@
     import '@react-chess/chessground/node_modules/chessground/assets/chessground.brown.css';
     import '@react-chess/chessground/node_modules/chessground/assets/chessground.cburnett.css';
 
-    import {Chess, Move, Square} from 'chess.js';
+    import {Chess, Move} from 'chess.js';
     import { useState, useEffect } from 'react';
     import { Config } from "@react-chess/chessground/node_modules/chessground/src/config.ts";
-
+    import {Key, Dests} from "@react-chess/chessground/node_modules/chessground/src/types.ts"
     const game = new Chess();
 
     const ChessBoard:React.FC = () => {
@@ -14,33 +14,33 @@
         let minsize: number = Math.min(window.innerHeight, window.innerWidth)-50;
         //const [legalMoves, setLegalMoves] = useState<string[]>([]);
         const [position, setPosition] = useState(game.fen()); 
-        const [dests, setDests] = useState<{[square:string]: Square[]}>({});
+        const [dests, setDests] = useState<Dests>(new Map<Key, Key[]>);
 
-        const handleMove = (from:Square, to:Square) => {
-            //const move:Move = game.move({from, to});
-            const validMoves = game.moves({square:from, verbose: true});
-            console.log(validMoves);
-            const isValidMove = validMoves.some((move: Move) => move.to === to);
+        // const handleMove = (from:Square, to:Square) => {
+        //     //const move:Move = game.move({from, to});
+        //     const validMoves = game.moves({square:from, verbose: true});
+        //     console.log(validMoves);
+        //     const isValidMove = validMoves.some((move: Move) => move.to === to);
 
-            if(isValidMove) {
-                const move: Move = game.move({from, to});
-                if(move) {
-                    setPosition(game.fen());
-                    updateDests();
-                }
-            } else {
-                console.log("invalid move");
-                setPosition(game.fen());
-                updateDests();
-                console.log(game.fen());
-            }
-        };
+        //     if(isValidMove) {
+        //         const move: Move = game.move({from, to});
+        //         if(move) {
+        //             setPosition(game.fen());
+        //             updateDests();
+        //         }
+        //     } else {
+        //         console.log("invalid move");
+        //         setPosition(game.fen());
+        //         updateDests();
+        //         console.log(game.fen());
+        //     }
+        // };
 
-        const onSelectPiece = (square:Square) => {
-            const moves:  Move[] = game.moves({square, verbose:true});
-            const legal = moves.map((move:Move)=> move.to);
-            //setLegalMoves(legal);
-        }
+        // const onSelectPiece = (square:Square) => {
+        //     const moves:Move[] = game.moves({square, verbose:false});
+        //     const legal = moves.map((move:Move)=> move.to);
+        //     //setLegalMoves(legal);
+        // }
 
         const [config, setConfig] = useState<Config>({
         
@@ -48,13 +48,33 @@
                 enabled: true,
                 showGhost: true,
                 autoDistance: true, 
+                deleteOnDropOff: false,
             },
             events: {
-                move: handleMove,
-                select: (square:any) => onSelectPiece(square),
+                //move: handleMove,
+                // select: (square:any) => onSelectPiece(square),
+                // select: (square:Key ) => {
+                //     const moves = game.moves({square, verbose: false});
+                // }, 
 
             },
             movable: {
+                events: {
+                    after: (from:Key, to: Key) => {
+                        //handleMove(from, to)
+                        try{    
+                            const move:Move = game.move({from, to});
+                            if (move) {
+                                setPosition(game.fen());
+                                updateDests();
+                            }
+                        }catch(error){
+                            console.log(error);
+                            setPosition(game.fen());
+                            updateDests();
+                        }
+                    },
+                },
                 dests: dests,
                 showDests: true,
 
@@ -67,6 +87,9 @@
                 enabled: true,
             },
             fen: position,
+            selectable: {
+                enabled: true,
+            }
         }
         );
         useEffect(() => {
@@ -77,25 +100,30 @@
                 fen: position,
                 movable: {
                     ...config.movable,
-                    dests: dests,
+                    dests,
                 }
             });
-            console.log(dests);
+            //console.log(dests);
+            console.log(config);
 
-        },[dests]);
+        },[dests,position]);
         // useEffect(() => {
         //     console.log(position);
         //     setPosition(game.fen());
         // },[game.fen()]);
 
         const updateDests = () => {
-            const dests: { [key: string]: string[]} = {};
+            //const dests: { [key: string]: string[]} = {};
+            const dests = new Map<Key, Key[]>();
             game.board().forEach((row) => {
                 row.forEach((piece) => {
                     if( piece){
                         const square = piece.square;
-                        dests[square] = game.moves({ square, verbose: false});
-            
+                        const moveList = game.moves({ square, verbose: false});
+                        if(moveList.length > 0){
+                            dests.set(square as Key, moveList as Key[]);
+                            //dests[square] = moveList;
+                        }
                     }
                 });
             });
