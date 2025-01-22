@@ -7,6 +7,8 @@
     import { useState, useEffect } from 'react';
     import { Config } from "@react-chess/chessground/node_modules/chessground/src/config.ts";
     import {Key, Dests} from "@react-chess/chessground/node_modules/chessground/src/types.ts"
+    import { usePuzzle } from "../hooks/usePuzzle";
+    
     const game = new Chess();
 
     const ChessBoard:React.FC = () => {
@@ -15,6 +17,11 @@
         //const [legalMoves, setLegalMoves] = useState<string[]>([]);
         const [position, setPosition] = useState(game.fen()); 
         const [dests, setDests] = useState<Dests>(new Map<Key, Key[]>);
+        
+        const { puzzle, solvePuzzle, loading } = usePuzzle();
+        const [solution, setSolution] = useState<string[]>([]);
+        //use move number to match solution's
+        const [moveNumber, setMoveNumber] = useState(0);
 
         // const handleMove = (from:Square, to:Square) => {
         //     //const move:Move = game.move({from, to});
@@ -35,12 +42,6 @@
         //         console.log(game.fen());
         //     }
         // };
-
-        // const onSelectPiece = (square:Square) => {
-        //     const moves:Move[] = game.moves({square, verbose:false});
-        //     const legal = moves.map((move:Move)=> move.to);
-        //     //setLegalMoves(legal);
-        // }
 
         const [config, setConfig] = useState<Config>({
         
@@ -93,14 +94,10 @@
         }
         );
         
-        //update destinations on mount
-        useEffect(() => {
-            updateDests();
-        },[]);
         
         useEffect(() => {
             // setPosition(game.fen());
-            // updateDests();
+            //updateDests();
             setConfig({
                 ...config,
                 fen: position,
@@ -113,6 +110,18 @@
             console.log(config);
 
         },[dests,position]);
+
+        
+        useEffect(() => {
+            if(!loading && puzzle) {
+                console.log(puzzle);
+                game.load(puzzle.fen);
+                setSolution(puzzle.puzzle.solution);
+                setPosition(game.fen());
+                updateDests();
+
+            }
+        },[puzzle, loading])
         // useEffect(() => {
         //     console.log(position);
         //     setPosition(game.fen());
@@ -172,7 +181,10 @@
 
         return (
             <div>
-                <Chessground config={config} width={minsize} height={minsize}/>
+                {loading ? 
+                        <div>loading...</div>
+                :
+                <Chessground config={config} width={minsize} height={minsize}/>}
             </div>
         )
     }
