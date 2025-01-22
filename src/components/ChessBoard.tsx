@@ -13,7 +13,7 @@
 
     const ChessBoard:React.FC = () => {
         // const [game,setGame] = useState(new Chess());
-        let minsize: number = Math.min(window.innerHeight, window.innerWidth)-50;
+        let minsize: number = Math.min(window.innerHeight, window.innerWidth)-20;
         //const [legalMoves, setLegalMoves] = useState<string[]>([]);
         const [position, setPosition] = useState(game.fen()); 
         const [dests, setDests] = useState<Dests>(new Map<Key, Key[]>);
