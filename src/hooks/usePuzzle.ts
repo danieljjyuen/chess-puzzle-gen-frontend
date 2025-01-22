@@ -9,7 +9,10 @@ export const usePuzzle = () => {
         try {
             setLoading(true);
             const data = await getNextPuzzle();
-            setPuzzle(data);
+            if(data){
+                setPuzzle(data);
+            }
+            
         } catch (error){
             console.error("error fetching puzzle: ",error);
         } finally{
@@ -21,8 +24,11 @@ export const usePuzzle = () => {
         fetchPuzzle();
     }, []);
 
-    const solvePuzzle = (solution: string[]) => {
-        const isCorrect = JSON.stringify(solution) === JSON.stringify(puzzle.puzzle.solution);
+    const solvePuzzle = (solution: string[], realSolution: string[]) => {
+        console.log(realSolution);
+        console.log(solution);
+        console.log(solution===realSolution);
+        const isCorrect = JSON.stringify(solution) === JSON.stringify(realSolution);
         if(isCorrect){
             alert("correct");
             fetchPuzzle();

@@ -20,7 +20,8 @@
         
         const { puzzle, solvePuzzle, loading } = usePuzzle();
         const puzzleRef = useRef(puzzle);
-        const [solution, setSolution] = useState<string[]>([]);
+        const solutionRef = useRef<string[]>([]);
+        //const [solution, setSolution] = useState<string[]>([]);
 
         // solution: [
         //     "c4e6",
@@ -93,12 +94,13 @@
                                     //setMoveNumber(moveNumber+1);
                                     setPosition(game.fen());
                                     updateDests();
-                                    setSolution([...solution,currentMove]);
+                                    solutionRef.current.push(currentMove);
+                                    //setSolution(prevSolution => [...prevSolution, currentMove]);
                                 }
                                 console.log(moveNumberRef, " " , realSolution.length);
+                                console.log(solutionRef.current);
                                 if(moveNumberRef.current == realSolution.length) {
-                                    solvePuzzle(solution);
-                                    setSolution([]);
+                                    solvePuzzle(solutionRef.current, realSolution);
                                     moveNumberRef.current = 0;
                                 }else {
                                     //console.log("auto moving");
@@ -113,7 +115,8 @@
                                         updateDests();
                                         //setMoveNumber(moveNumber+1);
                                         moveNumberRef.current++;
-                                        setSolution([...solution, autoNextMove]);
+                                        solutionRef.current.push(autoNextMove);
+                                        //setSolution(prevSolution => [...prevSolution, autoNextMove]);
                                     }
                                 }
                             }else{
@@ -170,12 +173,14 @@
                 puzzleRef.current = puzzle;
                 console.log(puzzleRef);
                 game.load(puzzle.fen);
-                setSolution([]);
                 setPosition(game.fen());
+                solutionRef.current = [];
                 updateDests();
 
             }
         },[puzzle, loading])
+    
+        
         // useEffect(() => {
         //     console.log(position);
         //     setPosition(game.fen());
