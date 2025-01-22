@@ -1,50 +1,30 @@
-# React + TypeScript + Vite
+# Chess Puzzle Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a TypeScript React frontend application that presents chess puzzles to users. It uses the @react-chess/chessground library for an interactive chessboard and chess.js for chess logic. The application fetches puzzle data from a backend API and dynamically generates puzzles. Once a puzzle is completed, the next puzzle is automatically loaded.
 
-Currently, two official plugins are available:
+## Features
+Interactive Chessboard: Powered by @react-chess/chessground, users can play out moves visually.
+Puzzle Generation: Fetches puzzle data from the backend, including FEN and target moves.
+Dynamic Progression: Automatically loads the next puzzle upon completion.
+Chess Logic: Validates moves using chess.js.
+Responsive Design: Optimized for various screen sizes.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+Frontend: React with TypeScript
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Libraries:
+@react-chess/chessground: Interactive chessboard
+chess.js: Chess logic and move validation
+axios: For API calls
+Backend Integration: Communicates with the FastAPI backend to fetch puzzle data.
 
-- Configure the top-level `parserOptions` property like this:
+### Usage
+View a Puzzle:
+The app fetches a puzzle from the backend and displays it on the chessboard. The starting position is shown using FEN notation.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Make Moves:
+Play your moves directly on the board. The app will validate moves and check if you’ve completed the puzzle.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+### Complete Puzzle:
+After solving the puzzle, the app will automatically fetch and display the next puzzle.
