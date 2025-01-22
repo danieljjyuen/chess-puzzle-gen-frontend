@@ -55,7 +55,6 @@
         // };
 
         const [config, setConfig] = useState<Config>({
-        
             draggable: {
                 enabled: true,
                 showGhost: true,
@@ -176,6 +175,10 @@
                 setPosition(game.fen());
                 solutionRef.current = [];
                 updateDests();
+                setConfig({
+                    ...config,
+                    orientation: puzzleRef.current.puzzle.initialPly%2 == 0 ? 'black': 'white',
+                });
 
             }
         },[puzzle, loading])
