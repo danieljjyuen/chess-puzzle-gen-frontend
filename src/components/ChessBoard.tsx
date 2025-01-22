@@ -4,7 +4,7 @@
     import '@react-chess/chessground/node_modules/chessground/assets/chessground.cburnett.css';
 
     import {Chess, Move} from 'chess.js';
-    import { useState, useEffect } from 'react';
+    import { useState, useEffect, useRef } from 'react';
     import { Config } from "@react-chess/chessground/node_modules/chessground/src/config.ts";
     import {Key, Dests} from "@react-chess/chessground/node_modules/chessground/src/types.ts"
     import { usePuzzle } from "../hooks/usePuzzle";
@@ -19,10 +19,20 @@
         const [dests, setDests] = useState<Dests>(new Map<Key, Key[]>);
         
         const { puzzle, solvePuzzle, loading } = usePuzzle();
+        const puzzleRef = useRef(puzzle);
         const [solution, setSolution] = useState<string[]>([]);
-        //use move number to match solution's
-        const [moveNumber, setMoveNumber] = useState(0);
 
+        // solution: [
+        //     "c4e6",
+        //     "d8d7",
+        //     "f3f8"
+        //     ],
+
+        // example solution: c4e6 => from:c4 to: e6
+
+        //use move number to match solution's
+        //const [moveNumber, setMoveNumber] = useState(0);
+        const moveNumberRef = useRef(0);
         // const handleMove = (from:Square, to:Square) => {
         //     //const move:Move = game.move({from, to});
         //     const validMoves = game.moves({square:from, verbose: true});
@@ -62,13 +72,55 @@
             movable: {
                 events: {
                     after: (from:Key, to: Key) => {
+                        console.log("chessgorund match chess.js", game.fen());
                         //handleMove(from, to)
                         try{    
-                            const move:Move = game.move({from, to, promotion: 'q'});
-                            if (move) {
+                            // console.log(puzzle);
+                            console.log(moveNumberRef.current);
+                            const realSolution = puzzleRef.current.puzzle.solution;
+                            console.log(realSolution);
+                            const currentMove = realSolution[moveNumberRef.current];
+                            console.log("current move : " , currentMove);
+                            const correctFrom = currentMove.slice(0,2);
+                            const correctTo = currentMove.slice(2,4);
+                            console.log(from===correctFrom);
+                            console.log(to===correctTo);
+                            console.log(`attempting to move from ${from} to ${to}`);
+                            if(from === correctFrom && to === correctTo){
+                                const move:Move = game.move({from, to, promotion: 'q'});
+                                if (move) {
+                                    moveNumberRef.current++;
+                                    //setMoveNumber(moveNumber+1);
+                                    setPosition(game.fen());
+                                    updateDests();
+                                    setSolution([...solution,currentMove]);
+                                }
+                                console.log(moveNumberRef, " " , realSolution.length);
+                                if(moveNumberRef.current == realSolution.length) {
+                                    solvePuzzle(solution);
+                                    setSolution([]);
+                                    moveNumberRef.current = 0;
+                                }else {
+                                    //console.log("auto moving");
+                                    const autoNextMove = realSolution[moveNumberRef.current];
+                                    console.log("auto moving ", autoNextMove)
+                                    const autoFrom = autoNextMove.slice(0,2);
+                                    const autoTo = autoNextMove.slice(2,4);
+                                    const autoMove = game.move({from:autoFrom, to:autoTo, promotion: 'q'});
+                                    
+                                    if(autoMove){
+                                        setPosition(game.fen());
+                                        updateDests();
+                                        //setMoveNumber(moveNumber+1);
+                                        moveNumberRef.current++;
+                                        setSolution([...solution, autoNextMove]);
+                                    }
+                                }
+                            }else{
                                 setPosition(game.fen());
                                 updateDests();
                             }
+
                         }catch(error){
                             console.log(error);
                             setPosition(game.fen());
@@ -92,12 +144,11 @@
                 enabled: true,
             }
         }
-        );
-        
+        );        
         
         useEffect(() => {
             // setPosition(game.fen());
-            //updateDests();
+            
             setConfig({
                 ...config,
                 fen: position,
@@ -106,8 +157,9 @@
                     dests,
                 }
             });
-            //console.log(dests);
-            console.log(config);
+            console.log(dests);
+            
+            //console.log(config);
 
         },[dests,position]);
 
@@ -115,8 +167,10 @@
         useEffect(() => {
             if(!loading && puzzle) {
                 console.log(puzzle);
+                puzzleRef.current = puzzle;
+                console.log(puzzleRef);
                 game.load(puzzle.fen);
-                setSolution(puzzle.puzzle.solution);
+                setSolution([]);
                 setPosition(game.fen());
                 updateDests();
 
