@@ -148,6 +148,7 @@
         }
         );        
         
+
         useEffect(() => {
             // setPosition(game.fen());
             
@@ -160,7 +161,7 @@
                 }
             });
             console.log(dests);
-            
+            console.log(config.movable?.dests);
             //console.log(config);
 
         },[dests,position]);
@@ -178,6 +179,10 @@
                 setConfig({
                     ...config,
                     orientation: puzzleRef.current.puzzle.initialPly%2 == 0 ? 'black': 'white',
+                    movable:{
+                        ...config.movable,
+                        dests
+                    }
                 });
 
             }
@@ -197,8 +202,14 @@
                     if( piece){
                         const square = piece.square;
                         const moveList = game.moves({ square, verbose: false});
+                        // console.log(`Piece at ${square}:`, piece);
+                        // console.log(`Moves for ${square}:`, moveList);
                         if(moveList.length > 0){
-                            dests.set(square as Key, moveList as Key[]);
+                            //parse movelist to match chessground's formatting 
+                            const parsedMovelist = moveList.map(move => {
+                                return move.length > 2 ? move.slice(1,3) : move;
+                            });
+                            dests.set(square as Key, parsedMovelist as Key[]);
                             //dests[square] = moveList;
                         }
                     }
@@ -206,9 +217,6 @@
             });
             setDests(dests);
         };
-
-
-
 
         // const updateDests = () => {
         //     const dests: { [key:string]:string[] } = {};
